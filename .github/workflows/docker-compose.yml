@@ -51,7 +51,7 @@ jobs:
     # Install PHP dependencies
     - name: Install dependencies
       run: |
-        docker-compose exec app composer install
+        docker-compose exec -T app composer install
 
     # Run tests (if you have PHPUnit or another test suite)
     - name: Run tests
