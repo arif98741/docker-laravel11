@@ -3,10 +3,10 @@ name: CI/CD for Laravel with Docker Compose
 on:
   push:
     branches:
-      - master
+      - pipeline-build
   pull_request:
     branches:
-      - master
+      - pipeline-build
 
 jobs:
   build:
