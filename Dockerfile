@@ -39,7 +39,7 @@ COPY --chown=$user:$user . .
 
 # Set permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data /var/www && \
-    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Entry point script to ensure permissions at startup
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
