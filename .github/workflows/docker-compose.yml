@@ -1,0 +1,70 @@
+name: CI/CD for Laravel with Docker Compose
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+        ports:
+          - 8000:80
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Set up Docker Buildx (if using multi-platform builds)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Cache Docker layers to speed up the build process
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    # Set up Docker Compose
+    - name: Set up Docker Compose
+      run: |
+        curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) > /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+
+    # Build and start the Docker containers
+    - name: Build and start containers
+      run: |
+        docker-compose -f docker-compose.yml up -d --build
+
+    # Install PHP dependencies
+    - name: Install dependencies
+      run: |
+        docker-compose exec app composer install
+
+    # Run tests (if you have PHPUnit or another test suite)
+    - name: Run tests
+      run: |
+        docker-compose exec app vendor/bin/phpunit
+
+    # Tear down containers after testing
+    - name: Shut down containers
+      run: |
+        docker-compose down
+
+    # Optional: Push Docker images to a registry (if you want to do this in your workflow)
+    - name: Push Docker image to Docker Hub (optional)
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker-compose -f docker-compose.yml push
