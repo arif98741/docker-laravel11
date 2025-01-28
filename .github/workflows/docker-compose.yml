@@ -48,6 +48,11 @@ jobs:
       run: |
         docker-compose -f docker-compose.yml up -d --build
 
+    # Fix ownership of the /var/www directory
+    - name: Fix ownership of the /var/www directory
+      run: |
+        docker-compose exec -T app chown -R $USER:$USER /var/www
+        
     # Install PHP dependencies
     - name: Install dependencies
       run: |
